@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const { swaggerUi, swaggerSpec } = require('./src/config/swagger');
 
 // Import routes
 const authRoutes = require('./src/routes/authRoutes'); // <- Tambahkan ini
@@ -12,6 +13,7 @@ const eventCategoryRoutes = require('./src/routes/eventCategoryRoutes'); // <- T
 const transactionCategoryRoutes = require('./src/routes/transactionCategoryRoutes'); // <- Tambahkan ini
 const eventRoutes = require('./src/routes/eventRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
+const registrationRoutes = require('./src/routes/registrationRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +30,9 @@ app.use('/api/event-categories', eventCategoryRoutes); // <- Tambahkan ini
 app.use('/api/transaction-categories', transactionCategoryRoutes); // <- Tambahkan ini
 app.use('/api/events', eventRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/registrations', registrationRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 app.get('/', (req, res) => {
     res.send('🎉 Halo dari Backend Aplikasi Masjid!');

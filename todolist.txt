@@ -1,0 +1,93 @@
+Tentu! Berikut teks yang sudah dirapikan tanpa kotak putih (input tag) dan langsung dalam format checklist biasa:
+
+---
+
+# AnnurConnect Frontend Step-by-Step TODO List
+
+## 1. Project Setup & Foundation (done)
+
+* Set up API service layer (Axios/fetch with JWT support)
+* Create authentication context/provider for user state and token management
+* Implement route protection (private routes, admin-only routes)
+* Set up responsive navigation (role-based menu)
+* Add error and loading state handling for all pages
+* Add toast/notification system for success/error messages
+
+## 2. Authentication (done)
+
+* Create login page (POST /api/auth/login)
+* Create registration page (POST /api/auth/register)
+* Implement JWT token storage (localStorage/cookies)
+* Implement logout functionality
+
+## 3. User Profile (done)
+
+* Create profile page (GET /api/users/me)
+* Edit device token for push notifications (PATCH /api/users/me/device-token)
+
+## 4. Admin Dashboard (role: admin) (done)
+
+### User Management
+
+* List all users (GET /api/users)
+
+### Ustadz Management
+
+* List ustadz (GET /api/ustadz)
+* Create ustadz (POST /api/ustadz)
+* Edit ustadz (PUT /api/ustadz/\:id)
+* Delete ustadz (DELETE /api/ustadz/\:id)
+
+### Event Category Management
+
+* List categories (GET /api/event-categories)
+* Create category (POST /api/event-categories)
+* Delete category (DELETE /api/event-categories/\:id)
+
+### Event Management
+
+* List events (GET /api/events)
+* Create event (POST /api/events)
+* Edit event (PUT /api/events/\:id)
+* Delete event (DELETE /api/events/\:id)
+
+### Transaction Category Management
+
+* List transaction categories (GET /api/transaction-categories)
+* Create transaction category (POST /api/transaction-categories)
+* Delete transaction category (DELETE /api/transaction-categories/\:id)
+
+### Transaction Management
+
+* List transactions (GET /api/transactions)
+* Create transaction (POST /api/transactions, with file upload)
+* Delete transaction (DELETE /api/transactions/\:id)
+
+## 5. Jamaah Dashboard (role: jamaah) (done)
+
+* View events (GET /api/events)
+* View event details (GET /api/events/\:id)
+* Register for event (POST /api/registrations/\:eventId)
+* Cancel event registration (DELETE /api/registrations/\:eventId)
+* View my registrations (GET /api/registrations/my)
+* View ustadz profiles (GET /api/ustadz)
+* View event categories (GET /api/event-categories)
+* View transaction categories (GET /api/transaction-categories)
+* View transactions (GET /api/transactions)
+
+## 6. General Features
+
+* Form validation and feedback
+* API documentation link (/api-docs)
+
+## 7. Optional/Advanced
+
+* Pagination for lists (users, events, transactions, etc.)
+* Search/filter for events, ustadz, transactions
+* File upload preview for transaction proofs
+* Dashboard analytics (event stats, transaction summaries)
+* Integration with push notification (device token management)
+
+---
+
+Kalau mau aku buatkan file txt atau markdown-nya juga?
