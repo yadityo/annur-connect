@@ -31,10 +31,15 @@ exports.registerForEvent = async (req, res) => {
 // @desc    Melihat semua acara yang diikuti oleh user
 // @route   GET /api/registrations/my
 exports.getMyRegistrations = async (req, res) => {
-    const registrations = await EventRegistration.find({ user: req.user.id }).populate({
-        path: 'event',
-        select: 'title startTime locationName'
-    });
+     const registrations = await EventRegistration.find({ user: req.user.id })
+        .populate({
+            path: 'event',
+            select: 'title startTime locationName description',
+            populate: [
+                { path: 'ustadz', select: 'name' },
+                { path: 'category', select: 'name' }
+            ]
+        });
     res.status(200).json({ status: 'success', data: { registrations } });
 };
 

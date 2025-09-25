@@ -41,25 +41,27 @@ exports.createEvent = async (req, res) => {
 };
 
 exports.getAllEvents = async (req, res) => {
-    const events = await Event.find()
-        .populate('ustadz', 'name') // Ambil field 'name' dari model Ustadz
-        .populate('category', 'name'); // Ambil field 'name' dari model EventCategory
-
-    res.status(200).json({ status: 'success', results: events.length, data: { events } });
+    try {
+        const events = await Event.find()
+            .populate('ustadz')
+            .populate('category');
+        res.status(200).json({ status: 'success', results: events.length, data: { events } });
+    } catch (error) {
+        res.status(500).json({ status: 'fail', message: error.message });
+    }
 };
 
 exports.getEventById = async (req, res) => {
     try {
         const event = await Event.findById(req.params.id)
-            .populate('ustadz', 'name bio')
-            .populate('category', 'name');
-
+            .populate('ustadz')
+            .populate('category');
         if (!event) {
-            return res.status(404).json({ status: 'fail', message: 'Acara tidak ditemukan' });
+            return res.status(404).json({ status: 'fail', message: 'Event not found' });
         }
         res.status(200).json({ status: 'success', data: { event } });
     } catch (error) {
-        res.status(500).json({ status: 'fail', message: 'Terjadi kesalahan pada server' });
+        res.status(500).json({ status: 'fail', message: error.message });
     }
 };
 

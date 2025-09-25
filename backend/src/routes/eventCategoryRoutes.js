@@ -66,14 +66,13 @@ const router = express.Router();
  *         description: Not found
  */
 
-// Semua route hanya untuk admin
-router.use(protect, restrictTo('admin'));
+router.use(protect);
 
 router.route('/')
-    .post(eventCategoryController.createCategory)
+    .post(restrictTo('admin'), eventCategoryController.createCategory)
     .get(eventCategoryController.getAllCategories);
 
 router.route('/:id')
-    .delete(eventCategoryController.deleteCategory);
+    .delete(restrictTo('admin'), eventCategoryController.deleteCategory);
 
 module.exports = router;

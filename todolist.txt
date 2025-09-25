@@ -80,13 +80,20 @@ Tentu! Berikut teks yang sudah dirapikan tanpa kotak putih (input tag) dan langs
 * Form validation and feedback
 * API documentation link (/api-docs)
 
-## 7. Optional/Advanced
+## 7. Optional/Advanced Features
 
 * Pagination for lists (users, events, transactions, etc.)
 * Search/filter for events, ustadz, transactions
 * File upload preview for transaction proofs
 * Dashboard analytics (event stats, transaction summaries)
 * Integration with push notification (device token management)
+
+## 8. Miscellaneous Features
+
+* Form Validation: Animated feedback (shake on error, green glow on success)
+* Search/Filter Components: Floating search bar or filter sidebar with tag-based filtering
+* Pagination: Animated number switching or "load more" button
+* Dark Mode (optional) with elegant inversion of blue/gold/white palette
 
 ---
 

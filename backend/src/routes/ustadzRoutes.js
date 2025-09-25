@@ -123,7 +123,7 @@ router.get('/', protect, ustadzController.getAllUstadz);
 router.get('/:id', protect, ustadzController.getUstadzById);
 
 // Admin-only endpoints
-router.use(protect, restrictTo('admin'));
+
 router.post('/', ustadzController.createUstadz);
 router.put('/:id', ustadzController.updateUstadz);
 router.delete('/:id', ustadzController.deleteUstadz);
