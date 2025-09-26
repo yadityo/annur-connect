@@ -15,6 +15,13 @@ const TRANSACTIONS = [
     { id: 4, tanggal: '25 Sep 2025', keterangan: 'Donasi dari Hamba Allah', kategori: 'Infaq', pemasukan: 2000000, pengeluaran: null, bukti: false },
 ];
 
+const GALLERY_IMAGES = [
+    { id: 1, src: "https://placehold.co/600x400/10B981/FFFFFF?text=Kajian+Akbar", alt: "Suasana kajian akbar di masjid" },
+    { id: 2, src: "https://placehold.co/600x400/3B82F6/FFFFFF?text=Buka+Puasa+Bersama", alt: "Kegiatan buka puasa bersama anak yatim" },
+    { id: 3, src: "https://placehold.co/600x400/F59E0B/FFFFFF?text=Kerja+Bakti", alt: "Jamaah melakukan kerja bakti membersihkan masjid" },
+];
+
+
 // --- HELPER FUNCTIONS ---
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -40,7 +47,7 @@ const KajianCard = ({ kajian, navigate }) => (
     </div>
 );
 
-const PublicNavbar = ({ page, isLoggedIn, navigate, loginAdmin, logout }) => {
+const PublicNavbar = ({ page, currentUser, navigate, logout }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -59,7 +66,7 @@ const PublicNavbar = ({ page, isLoggedIn, navigate, loginAdmin, logout }) => {
                         <a onClick={(e) => { e.preventDefault(); navigate('kajian'); }} href="#" className={`text-slate-600 hover:text-emerald-600 transition-colors ${page.startsWith('kajian') ? 'text-emerald-600 font-semibold' : ''}`}>Kajian</a>
                         <a onClick={(e) => { e.preventDefault(); navigate('laporan'); }} href="#" className={`text-slate-600 hover:text-emerald-600 transition-colors ${page === 'laporan' ? 'text-emerald-600 font-semibold' : ''}`}>Laporan</a>
                         <div className="flex items-center space-x-2">
-                            {!isLoggedIn ? (
+                            {!currentUser ? (
                                 <>
                                     <a onClick={(e) => { e.preventDefault(); navigate('login'); }} href="#" className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-100 transition-colors">Login</a>
                                     <a onClick={(e) => { e.preventDefault(); navigate('register'); }} href="#" className="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-600 transition-colors">Register</a>
@@ -67,14 +74,14 @@ const PublicNavbar = ({ page, isLoggedIn, navigate, loginAdmin, logout }) => {
                             ) : (
                                 <div className="relative">
                                     <button onClick={() => setProfileMenuOpen(!profileMenuOpen)} className="flex items-center space-x-2">
-                                        <img src="https://placehold.co/40x40/E2E8F0/475569?text=U" alt="User" className="w-8 h-8 rounded-full" />
-                                        <span className="text-slate-600 font-medium text-sm hidden sm:inline">User</span>
+                                        <img src={currentUser.role === 'dkm' ? "https://placehold.co/40x40/10B981/FFFFFF?text=A" : "https://placehold.co/40x40/E2E8F0/475569?text=U"} alt="User" className="w-8 h-8 rounded-full" />
+                                        <span className="text-slate-600 font-medium text-sm hidden sm:inline">{currentUser.name}</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                                     </button>
                                     {profileMenuOpen && (
-                                        <div onMouseLeave={() => setProfileMenuOpen(false)} className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1">
-                                            <a onClick={(e) => { e.preventDefault(); navigate('profil'); setProfileMenuOpen(false); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Profil Saya</a>
-                                            <a onClick={(e) => { e.preventDefault(); loginAdmin(); setProfileMenuOpen(false); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Dashboard Admin</a>
+                                        <div onMouseLeave={() => setProfileMenuOpen(false)} className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-20">
+                                            {currentUser.role === 'jamaah' && <a onClick={(e) => { e.preventDefault(); navigate('profil'); setProfileMenuOpen(false); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Profil Saya</a>}
+                                            {currentUser.role === 'dkm' && <a onClick={(e) => { e.preventDefault(); navigate('admin_dashboard'); setProfileMenuOpen(false); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Dashboard Admin</a>}
                                             <a onClick={(e) => { e.preventDefault(); logout(); setProfileMenuOpen(false); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Logout</a>
                                         </div>
                                     )}
@@ -96,15 +103,15 @@ const PublicNavbar = ({ page, isLoggedIn, navigate, loginAdmin, logout }) => {
                         <a onClick={(e) => { e.preventDefault(); navigate('kajian'); setMobileMenuOpen(false); }} href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${page.startsWith('kajian') ? 'text-white bg-emerald-500' : 'text-slate-600 hover:bg-slate-100'}`}>Kajian</a>
                         <a onClick={(e) => { e.preventDefault(); navigate('laporan'); setMobileMenuOpen(false); }} href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${page === 'laporan' ? 'text-white bg-emerald-500' : 'text-slate-600 hover:bg-slate-100'}`}>Laporan</a>
                         <div className="border-t border-slate-200 my-2"></div>
-                        {!isLoggedIn ? (
+                        {!currentUser ? (
                             <>
                                 <a onClick={(e) => { e.preventDefault(); navigate('login'); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Login</a>
                                 <a onClick={(e) => { e.preventDefault(); navigate('register'); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Register</a>
                             </>
                         ) : (
                             <>
-                                <a onClick={(e) => { e.preventDefault(); navigate('profil'); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Profil Saya</a>
-                                <a onClick={(e) => { e.preventDefault(); loginAdmin(); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Dashboard Admin</a>
+                                {currentUser.role === 'jamaah' && <a onClick={(e) => { e.preventDefault(); navigate('profil'); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Profil Saya</a>}
+                                {currentUser.role === 'dkm' && <a onClick={(e) => { e.preventDefault(); navigate('admin_dashboard'); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Dashboard Admin</a>}
                                 <a onClick={(e) => { e.preventDefault(); logout(); setMobileMenuOpen(false); }} href="#" className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-100">Logout</a>
                             </>
                         )}
@@ -115,22 +122,173 @@ const PublicNavbar = ({ page, isLoggedIn, navigate, loginAdmin, logout }) => {
     );
 };
 
+const Carousel = () => {
+    const slides = [
+        {
+            bgColor: 'bg-emerald-600',
+            title: 'Selamat Datang di Masjid Al-Hikmah',
+            description: 'Pusat informasi kegiatan, kajian, dan transparansi keuangan untuk kemudahan jamaah.',
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+        },
+        {
+            bgColor: 'bg-sky-600',
+            title: 'Temukan Jadwal Kajian Terbaru',
+            description: 'Akses semua jadwal kajian yang akan datang dengan mudah dan cepat. Jangan lewatkan ilmu bermanfaat.',
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        },
+        {
+            bgColor: 'bg-indigo-600',
+            title: 'Akses Laporan Keuangan Transparan',
+            description: 'Lihat laporan pemasukan dan pengeluaran dana infaq masjid secara realtime dan terperinci.',
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        },
+        {
+            bgColor: 'bg-rose-600',
+            title: 'Daftar Kajian Secara Online',
+            description: 'Daftarkan diri Anda untuk mengikuti kajian pilihan langsung dari website. Mudah dan praktis.',
+            icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+        },
+    ];
+
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex((prevIndex) => (prevIndex === slides.length - 1 ? 0 : prevIndex + 1));
+        }, 5000); // Change slide every 5 seconds
+        return () => clearInterval(interval);
+    }, [slides.length]);
+
+    return (
+        <section className="relative w-full h-[450px] md:h-[400px] rounded-2xl shadow-lg mb-12 overflow-hidden">
+            <div className="w-full h-full relative">
+                {slides.map((slide, index) => (
+                    <div
+                        key={index}
+                        className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ease-in-out ${slide.bgColor} ${currentIndex === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    >
+                        <div className="w-full h-full flex flex-col items-center justify-center text-white text-center p-8">
+                            {slide.icon}
+                            <h1 className="text-3xl md:text-5xl font-bold mb-4">{slide.title}</h1>
+                            <p className="max-w-3xl mx-auto text-base md:text-lg opacity-90">{slide.description}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+                {slides.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setCurrentIndex(index)}
+                        className={`w-3 h-3 rounded-full transition-colors ${currentIndex === index ? 'bg-white' : 'bg-white/50 hover:bg-white/75'}`}
+                        aria-label={`Go to slide ${index + 1}`}
+                    ></button>
+                ))}
+            </div>
+        </section>
+    );
+};
+
+
 // --- PAGES ---
 const HomePage = ({ navigate }) => {
     const upcomingKajian = useMemo(() => ALL_KAJIAN.slice(0, 3), []);
+    const totalPemasukan = useMemo(() => TRANSACTIONS.reduce((acc, trx) => acc + (trx.pemasukan || 0), 0), []);
+    const totalPengeluaran = useMemo(() => TRANSACTIONS.reduce((acc, trx) => acc + (trx.pengeluaran || 0), 0), []);
+    const saldoAkhir = totalPemasukan - totalPengeluaran;
+
+    const prayerTimes = {
+        Imsak: '04:26',
+        Subuh: '04:36',
+        Terbit: '05:51',
+        Dhuha: '06:19',
+        Dzuhur: '11:53',
+        Ashar: '15:14',
+        Maghrib: '17:54',
+        Isya: '19:05',
+    };
+
     return (
         <>
-            <section className="text-center bg-white p-8 md:p-16 rounded-2xl shadow-sm mb-12">
-                <h1 className="text-4xl md:text-5xl font-bold text-emerald-600 mb-4">Selamat Datang di Masjid Al-Hikmah</h1>
-                <p className="max-w-3xl mx-auto text-slate-500 text-lg">Pusat informasi kegiatan, kajian, dan transparansi keuangan untuk kemudahan jamaah.</p>
-                <div className="mt-8">
-                    <img src="https://placehold.co/1000x400/10B981/FFFFFF?text=Ilustrasi+Masjid" alt="Ilustrasi Masjid Al-Hikmah" className="w-full h-auto object-cover rounded-xl shadow-lg" />
+            <Carousel />
+
+            {/* Info & Quote Section */}
+            <section className="mb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-md">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-4">Jadwal Sholat Hari Ini</h3>
+                        <p className="text-sm text-slate-500 mb-6">Untuk wilayah Bandung dan sekitarnya (Jumat, 26 September 2025)</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                            {Object.entries(prayerTimes).map(([name, time]) => (
+                                <div key={name} className="bg-slate-50 p-4 rounded-lg">
+                                    <p className="font-semibold text-slate-700">{name}</p>
+                                    <p className="text-2xl font-bold text-emerald-600 tracking-wider">{time}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="bg-emerald-600 text-white p-8 rounded-2xl shadow-md flex flex-col justify-center items-center text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                        <blockquote className="text-lg italic">"Barangsiapa yang menempuh suatu jalan untuk menuntut ilmu, maka Allah akan memudahkan baginya jalan menuju surga."</blockquote>
+                        <cite className="mt-4 not-italic font-semibold">(HR. Muslim)</cite>
+                    </div>
                 </div>
             </section>
-            <section>
+
+            {/* Financial Summary */}
+            <section className="mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div className="bg-white p-6 rounded-2xl shadow-md">
+                        <p className="text-slate-500">Total Pemasukan</p>
+                        <p className="text-3xl font-bold text-green-600 mt-2">{formatCurrency(totalPemasukan)}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-md">
+                        <p className="text-slate-500">Total Pengeluaran</p>
+                        <p className="text-3xl font-bold text-red-600 mt-2">{formatCurrency(totalPengeluaran)}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-md">
+                        <p className="text-slate-500">Saldo Kas Masjid</p>
+                        <p className="text-3xl font-bold text-emerald-700 mt-2">{formatCurrency(saldoAkhir)}</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Kajian Section */}
+            <section className="mb-12">
                 <h2 className="text-3xl font-bold mb-6 text-center">Kajian Terdekat</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {upcomingKajian.map(kajian => <KajianCard key={kajian.id} kajian={kajian} navigate={navigate} />)}
+                </div>
+            </section>
+
+            {/* Gallery Section */}
+            <section className="mb-12">
+                <h2 className="text-3xl font-bold mb-6 text-center">Galeri Kegiatan</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {GALLERY_IMAGES.map(image => (
+                        <div key={image.id} className="overflow-hidden rounded-xl shadow-lg">
+                            <img src={image.src} alt={image.alt} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Donation Section */}
+            <section className="bg-white p-8 md:p-12 rounded-2xl shadow-lg text-center">
+                <h2 className="text-3xl font-bold text-emerald-600 mb-2">Mari Berinfaq untuk Masjid</h2>
+                <p className="max-w-2xl mx-auto text-slate-500 mb-8">Setiap donasi Anda sangat berarti untuk mendukung kegiatan dakwah dan operasional masjid.</p>
+                <div className="flex flex-col md:flex-row justify-center items-center gap-8">
+                    <div className="text-left">
+                        <p className="font-semibold text-slate-800">Transfer Bank:</p>
+                        <p className="text-slate-600">Bank Syariah Indonesia (BSI)</p>
+                        <p className="text-2xl font-bold text-slate-900 tracking-widest">7123456789</p>
+                        <p className="text-slate-600">a.n. DKM Al-Hikmah</p>
+                    </div>
+                    <div className="font-bold text-slate-400">ATAU</div>
+                    <div>
+                        <img src="https://placehold.co/150x150/E2E8F0/475569?text=QRIS" alt="QRIS Code for Donation" className="rounded-lg"/>
+                    </div>
                 </div>
             </section>
         </>
@@ -149,7 +307,7 @@ const KajianListPage = ({ navigate }) => (
     </>
 );
 
-const KajianDetailPage = ({ kajianId, isLoggedIn, navigate, userRegisteredIds, registerKajian, unregisterKajian }) => {
+const KajianDetailPage = ({ kajianId, currentUser, navigate, userRegisteredIds, registerKajian, unregisterKajian }) => {
     const selectedKajian = useMemo(() => ALL_KAJIAN.find(k => k.id === kajianId), [kajianId]);
     const isUserRegistered = userRegisteredIds.includes(kajianId);
 
@@ -172,7 +330,7 @@ const KajianDetailPage = ({ kajianId, isLoggedIn, navigate, userRegisteredIds, r
                 </div>
                 <div className="prose max-w-none mt-8 text-slate-600" dangerouslySetInnerHTML={{ __html: selectedKajian.deskripsi }}></div>
                 <div className="mt-10 pt-6 border-t border-slate-200">
-                    {!isLoggedIn ? (
+                    {!currentUser ? (
                         <p className="text-center text-slate-500">Silakan <a onClick={(e) => { e.preventDefault(); navigate('login'); }} href="#" className="text-emerald-600 font-semibold hover:underline">login</a> untuk mendaftar kajian ini.</p>
                     ) : (
                         <>
@@ -231,26 +389,61 @@ const LaporanPage = () => {
     );
 };
 
-const LoginPage = ({ navigate, login }) => (
-    <div className="flex items-center justify-center py-12">
-        <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-emerald-600">Login</h1>
-                    <p className="text-slate-500">Masuk untuk mengakses fitur jamaah.</p>
-                </div>
-                <form onSubmit={(e) => { e.preventDefault(); login(); }}>
-                    <div className="space-y-4">
-                        <div><label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label><input type="email" id="email" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500" placeholder="nama@email.com" required /></div>
-                        <div><label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label><input type="password" id="password" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500" placeholder="••••••••" required /></div>
+const LoginPage = ({ navigate, login }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLogin = (e) => {
+        e.preventDefault();
+        login(email, password);
+    };
+
+    return (
+        <div className="flex items-center justify-center py-12">
+            <div className="w-full max-w-md">
+                <div className="bg-white rounded-2xl shadow-xl p-8">
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold text-emerald-600">Login</h1>
+                        <p className="text-slate-500">Masuk untuk mengakses fitur jamaah.</p>
+                        <p className="text-xs text-slate-400 mt-2">(Untuk DKM, gunakan email: admin@dkm.com)</p>
                     </div>
-                    <div className="mt-6"><button type="submit" className="w-full bg-emerald-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-emerald-600 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Login</button></div>
-                    <p className="text-center text-sm text-slate-500 mt-6">Belum punya akun? <a onClick={(e) => { e.preventDefault(); navigate('register'); }} href="#" className="font-medium text-emerald-600 hover:underline">Register di sini</a></p>
-                </form>
+                    <form onSubmit={handleLogin}>
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                                    placeholder="nama@email.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-6">
+                            <button type="submit" className="w-full bg-emerald-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-emerald-600 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Login</button>
+                        </div>
+                        <p className="text-center text-sm text-slate-500 mt-6">Belum punya akun? <a onClick={(e) => { e.preventDefault(); navigate('register'); }} href="#" className="font-medium text-emerald-600 hover:underline">Register di sini</a></p>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const RegisterPage = ({ navigate, login }) => (
     <div className="flex items-center justify-center py-12">
@@ -260,7 +453,7 @@ const RegisterPage = ({ navigate, login }) => (
                     <h1 className="text-3xl font-bold text-emerald-600">Register</h1>
                     <p className="text-slate-500">Buat akun baru untuk mendaftar kajian.</p>
                 </div>
-                <form onSubmit={(e) => { e.preventDefault(); login(); }}>
+                <form onSubmit={(e) => { e.preventDefault(); login('jamaah@email.com', 'password'); }}>
                     <div className="space-y-4">
                         <div><label htmlFor="nama" className="block text-sm font-medium text-slate-700">Nama Lengkap</label><input type="text" id="nama" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg" placeholder="Nama Anda" required /></div>
                         <div><label htmlFor="email_reg" className="block text-sm font-medium text-slate-700">Email</label><input type="email" id="email_reg" className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg" placeholder="nama@email.com" required /></div>
@@ -275,8 +468,12 @@ const RegisterPage = ({ navigate, login }) => (
     </div>
 );
 
-const ProfilPage = ({ navigate, userRegisteredIds, unregisterKajian }) => {
+const ProfilPage = ({ navigate, currentUser, userRegisteredIds, unregisterKajian }) => {
     const userRegisteredKajian = useMemo(() => ALL_KAJIAN.filter(k => userRegisteredIds.includes(k.id)), [userRegisteredIds]);
+
+    if (!currentUser || currentUser.role !== 'jamaah') {
+        return <p>Halaman tidak dapat diakses.</p>;
+    }
 
     return (
         <>
@@ -285,8 +482,8 @@ const ProfilPage = ({ navigate, userRegisteredIds, unregisterKajian }) => {
                 <div className="lg:col-span-1">
                     <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
                         <img src="https://placehold.co/128x128/E2E8F0/475569?text=U" alt="User Profile" className="w-32 h-32 rounded-full mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold text-slate-900">User Jamaah</h2>
-                        <p className="text-slate-500">user.jamaah@email.com</p>
+                        <h2 className="text-2xl font-bold text-slate-900">{currentUser.name}</h2>
+                        <p className="text-slate-500">{currentUser.email}</p>
                         <button className="mt-4 w-full bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200 transition-colors">Edit Profil</button>
                     </div>
                 </div>
@@ -334,7 +531,7 @@ const AdminSidebar = ({ page, navigate, sidebarOpen }) => (
     </aside>
 );
 
-const AdminHeader = ({ setSidebarOpen, logoutAdmin }) => {
+const AdminHeader = ({ setSidebarOpen, logout }) => {
     const [profileOpen, setProfileOpen] = useState(false);
     return (
         <header className="flex items-center justify-between h-16 bg-white border-b px-6">
@@ -350,7 +547,7 @@ const AdminHeader = ({ setSidebarOpen, logoutAdmin }) => {
                     </button>
                     {profileOpen && (
                         <div onMouseLeave={() => setProfileOpen(false)} className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-10">
-                            <a onClick={(e) => { e.preventDefault(); logoutAdmin(); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Logout</a>
+                            <a onClick={(e) => { e.preventDefault(); logout(); }} href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Logout</a>
                         </div>
                     )}
                 </div>
@@ -380,7 +577,7 @@ const AdminDashboardPage = () => {
             <h1 className="text-2xl font-semibold text-slate-800 mb-6">Dashboard</h1>
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Total Kajian</p><p className="text-3xl font-bold text-slate-800">{ALL_KAJIAN.length}</p></div><div className="bg-emerald-100 text-emerald-600 p-3 rounded-full"><svg xmlns="http://www.w.3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div></div>
+                <div className="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Total Kajian</p><p className="text-3xl font-bold text-slate-800">{ALL_KAJIAN.length}</p></div><div className="bg-emerald-100 text-emerald-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div></div>
                 <div className="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Total Ustadz</p><p className="text-3xl font-bold text-slate-800">4</p></div><div className="bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div></div>
                 <div className="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Total Jamaah</p><p className="text-3xl font-bold text-slate-800">125</p></div><div className="bg-indigo-100 text-indigo-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div></div>
                 <div className="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between"><div><p className="text-sm text-slate-500">Total Transaksi</p><p className="text-3xl font-bold text-slate-800">{TRANSACTIONS.length}</p></div><div className="bg-yellow-100 text-yellow-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></div></div>
@@ -490,8 +687,7 @@ const AdminDataMasterPage = () => (
 export default function App() {
     const [page, setPage] = useState('home');
     const [pageId, setPageId] = useState(null);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [userRegisteredIds, setUserRegisteredIds] = useState([2]);
 
@@ -499,34 +695,50 @@ export default function App() {
     useEffect(() => {
         const handleHashChange = () => {
             const hash = window.location.hash.replace('#', '');
-            if (hash) {
-                const [path, id] = hash.split('/');
-                setPage(id ? `${path}_detail` : path);
-                setPageId(id ? parseInt(id, 10) : null);
-                setIsAdmin(path.startsWith('admin'));
-            } else {
-                setPage('home');
-                setPageId(null);
-                setIsAdmin(false);
+            const [path, id] = hash.split('/');
+            const newPage = id ? `${path}_detail` : path || 'home';
+
+            // Access control
+            if (newPage.startsWith('admin') && currentUser?.role !== 'dkm') {
+                navigate('home');
+                return;
             }
+            if (newPage === 'profil' && currentUser?.role !== 'jamaah') {
+                navigate('home');
+                return;
+            }
+
+            setPage(newPage);
+            setPageId(id ? parseInt(id, 10) : null);
             window.scrollTo(0, 0);
         };
 
         window.addEventListener('hashchange', handleHashChange);
-        handleHashChange(); // Initial load
+        handleHashChange();
 
         return () => window.removeEventListener('hashchange', handleHashChange);
-    }, []);
+    }, [currentUser]); // Re-run effect if currentUser changes
 
     const navigate = (newPage, id = null) => {
-        window.location.hash = id ? `${newPage.replace('_detail', '')}/${id}` : newPage;
+        const path = id ? `${newPage.replace('_detail', '')}/${id}` : newPage;
+        window.location.hash = path;
     };
 
     // Auth methods
-    const login = () => { setIsLoggedIn(true); navigate('home'); };
-    const logout = () => { setIsLoggedIn(false); navigate('home'); };
-    const loginAdmin = () => { setIsLoggedIn(true); navigate('admin_dashboard'); };
-    const logoutAdmin = () => { setIsLoggedIn(true); navigate('home'); };
+    const login = (email, password) => {
+        // Mock login logic
+        if (email.toLowerCase() === 'admin@dkm.com') {
+            setCurrentUser({ name: 'Admin DKM', email: email, role: 'dkm' });
+            navigate('admin_dashboard');
+        } else {
+            setCurrentUser({ name: 'User Jamaah', email: email, role: 'jamaah' });
+            navigate('home');
+        }
+    };
+    const logout = () => {
+        setCurrentUser(null);
+        navigate('home');
+    };
 
     // User Kajian methods
     const registerKajian = (kajianId) => {
@@ -540,7 +752,7 @@ export default function App() {
 
     // Page Renderer
     const renderPublicPage = () => {
-        const props = { navigate, isLoggedIn, login, logout, loginAdmin, userRegisteredIds, registerKajian, unregisterKajian };
+        const props = { navigate, currentUser, login, logout, userRegisteredIds, registerKajian, unregisterKajian };
         switch (page) {
             case 'home': return <HomePage {...props} />;
             case 'kajian': return <KajianListPage {...props} />;
@@ -563,12 +775,12 @@ export default function App() {
         }
     };
 
-    if (isAdmin) {
+    if (currentUser && currentUser.role === 'dkm' && page.startsWith('admin')) {
         return (
             <div className="flex h-screen bg-slate-100">
                 <AdminSidebar page={page} navigate={navigate} sidebarOpen={sidebarOpen} />
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <AdminHeader setSidebarOpen={setSidebarOpen} logoutAdmin={logoutAdmin} />
+                    <AdminHeader setSidebarOpen={setSidebarOpen} logout={logout} />
                     <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-6">
                         {renderAdminPage()}
                     </main>
@@ -579,7 +791,7 @@ export default function App() {
 
     return (
         <>
-            <PublicNavbar page={page} isLoggedIn={isLoggedIn} navigate={navigate} loginAdmin={loginAdmin} logout={logout} />
+            <PublicNavbar page={page} currentUser={currentUser} navigate={navigate} logout={logout} />
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
                 {renderPublicPage()}
             </main>
