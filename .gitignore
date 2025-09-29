@@ -26,17 +26,19 @@ dist-ssr
 # Dependencies
 /node_modules
 /frontend/node_modules
-/.backend-old/node_modules
-/.backend-old/src/config/annurconnect-firebase-adminsdk.json
+/backend/node_modules
+
 
 # Build files
 /frontend/dist
+/backend/dist
 /.backend-old/dist
 
 # Environment variables
 .env
 .env.*
 /frontend/.env
+/backend/.env
 /.backend-old/.env
 
 
