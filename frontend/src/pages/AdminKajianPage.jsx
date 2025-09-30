@@ -151,7 +151,14 @@ export default function AdminKajianPage() {
                                 <tr key={kajian._id} className="bg-white border-b hover:bg-slate-50">
                                     <th className="px-6 py-4 font-medium text-slate-900">{kajian.judul}</th>
                                     <td className="px-6 py-4">{kajian.ustadz?.nama || '-'}</td>
-                                    <td className="px-6 py-4">{kajian.tanggal ? new Date(kajian.tanggal).toLocaleString() : '-'}</td>
+                                    <td className="px-6 py-4">{kajian.tanggal ? new Date(kajian.tanggal).toLocaleString('id-ID', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    }) : '-'}</td>
                                     <td className="px-6 py-4">{kajian.kategori?.nama || '-'}</td>
                                     <td className="px-6 py-4">{kajian.deskripsi || '-'}</td>
                                     <td className="px-6 py-4 text-right">

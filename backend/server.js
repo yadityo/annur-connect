@@ -13,6 +13,7 @@ const Transaksi = require('./models/Transaksi');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -270,6 +271,18 @@ app.delete('/api/kajian/:id', async (req, res) => {
     res.status(500).json({ error: 'Gagal menghapus kajian.' });
   }
 });
+app.get('/api/kajian/:id', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ error: 'Id kajian tidak valid.' });
+    }
+    const kajian = await Kajian.findById(req.params.id).populate('ustadz').populate('kategori');
+    if (!kajian) return res.status(404).json({ error: 'Kajian tidak ditemukan.' });
+    res.json(kajian);
+  } catch (err) {
+    res.status(500).json({ error: 'Gagal mengambil detail kajian.' });
+  }
+});
 
 // CRUD Transaksi
 app.get('/api/transaksi', async (req, res) => {
@@ -329,6 +342,55 @@ app.delete('/api/transaksi/:id', async (req, res) => {
     res.json({ message: 'Transaksi berhasil dihapus.' });
   } catch (err) {
     res.status(500).json({ error: 'Gagal menghapus transaksi.' });
+  }
+});
+
+// Proxy jadwal sholat Bandung
+app.get('/api/jadwal-sholat', async (req, res) => {
+  try {
+    const response = await fetch('https://api.myquran.com/v1/sholat/jadwal/1301/today');
+    if (!response.ok) {
+      console.error('Jadwal sholat fetch error:', response.status, response.statusText);
+      // Fallback jadwal sholat Bandung (default)
+      return res.json({
+        data: {
+          jadwal: {
+            tanggal: new Date().toLocaleDateString('id-ID'),
+            imsak: '04:27',
+            subuh: '04:37',
+            terbit: '05:47',
+            dhuha: '06:15',
+            dzuhur: '11:52',
+            ashar: '15:09',
+            maghrib: '17:56',
+            isya: '19:05'
+          }
+        },
+        fallback: true
+      });
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Jadwal sholat error:', err);
+    // Fallback jadwal sholat Bandung (default)
+    res.json({
+      data: {
+        jadwal: {
+          tanggal: new Date().toLocaleDateString('id-ID'),
+          imsak: '04:27',
+          subuh: '04:37',
+          terbit: '05:47',
+          dhuha: '06:15',
+          dzuhur: '11:52',
+          ashar: '15:09',
+          maghrib: '17:56',
+          isya: '19:05'
+        }
+      },
+      fallback: true,
+      error: err.message
+    });
   }
 });
 

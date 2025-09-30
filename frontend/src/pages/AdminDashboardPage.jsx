@@ -1,10 +1,8 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { ALL_KAJIAN } from '../data';
 import { formatCurrency } from '../utils';
 
 export default function AdminDashboardPage() {
     const [transaksi, setTransaksi] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [ustadzList, setUstadzList] = useState([]);
     const [jamaahCount, setJamaahCount] = useState(0);
     const [kajianCount, setKajianCount] = useState(0);
@@ -14,7 +12,7 @@ export default function AdminDashboardPage() {
         fetch('http://localhost:5000/api/transaksi')
             .then(res => res.json())
             .then(data => setTransaksi(Array.isArray(data) ? data : []))
-            .finally(() => setLoading(false));
+            .catch(() => setTransaksi([]));
     }, []);
 
     useEffect(() => {
@@ -139,7 +137,14 @@ export default function AdminDashboardPage() {
                             {upcomingKajian.map(kajian => (
                                 <li key={kajian._id} className="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
                                     <p className="font-semibold text-slate-700">{kajian.judul}</p>
-                                    <p className="text-sm text-slate-500">{kajian.ustadz?.nama || '-'} - {kajian.tanggal ? new Date(kajian.tanggal).toLocaleString() : '-'}</p>
+                                    <p className="text-sm text-slate-500">{kajian.ustadz?.nama || '-'} - {kajian.tanggal ? new Date(kajian.tanggal).toLocaleString('id-ID', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    }) : '-'}</p>
                                 </li>
                             ))}
                         </ul>

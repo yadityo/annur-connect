@@ -1,25 +1,53 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import Carousel from '../components/Carousel';
 import KajianCard from '../components/KajianCard';
-import { ALL_KAJIAN, TRANSACTIONS } from '../data';
 import { formatCurrency } from '../utils';
 
 export default function HomePage({ navigate }) {
-    const upcomingKajian = useMemo(() => ALL_KAJIAN.slice(0, 3), []);
-    const totalPemasukan = useMemo(() => TRANSACTIONS.reduce((acc, trx) => acc + (trx.pemasukan || 0), 0), []);
-    const totalPengeluaran = useMemo(() => TRANSACTIONS.reduce((acc, trx) => acc + (trx.pengeluaran || 0), 0), []);
+    // Transactions come from backend API
+    const [transactions, setTransactions] = useState([]);
+    useEffect(() => {
+        fetch('http://localhost:5000/api/transaksi')
+            .then(res => res.json())
+            .then(data => setTransactions(Array.isArray(data) ? data : []))
+            .catch(() => setTransactions([]));
+    }, []);
+
+    const totalPemasukan = useMemo(() => transactions.reduce((acc, trx) => acc + (Number(trx.pemasukan) || 0), 0), [transactions]);
+    const totalPengeluaran = useMemo(() => transactions.reduce((acc, trx) => acc + (Number(trx.pengeluaran) || 0), 0), [transactions]);
     const saldoAkhir = totalPemasukan - totalPengeluaran;
 
-    const prayerTimes = {
-        Imsak: '04:26',
-        Subuh: '04:36',
-        Terbit: '05:51',
-        Dhuha: '06:19',
-        Dzuhur: '11:53',
-        Ashar: '15:14',
-        Maghrib: '17:54',
-        Isya: '19:05',
-    };
+    // State untuk jadwal sholat
+    const [prayerTimes, setPrayerTimes] = useState(null);
+    const [prayerDate, setPrayerDate] = useState('');
+    useEffect(() => {
+        // Ambil jadwal sholat dari backend agar tidak kena CORS
+        fetch('http://localhost:5000/api/jadwal-sholat')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.data && data.data.jadwal) {
+                    setPrayerTimes({
+                        Imsak: data.data.jadwal.imsak,
+                        Subuh: data.data.jadwal.subuh,
+                        Terbit: data.data.jadwal.terbit,
+                        Dhuha: data.data.jadwal.dhuha,
+                        Dzuhur: data.data.jadwal.dzuhur,
+                        Ashar: data.data.jadwal.ashar,
+                        Maghrib: data.data.jadwal.maghrib,
+                        Isya: data.data.jadwal.isya,
+                    });
+                    setPrayerDate(data.data.jadwal.tanggal);
+                }
+            });
+    }, []);
+
+    const [upcomingKajian, setUpcomingKajian] = useState([]);
+    useEffect(() => {
+        fetch('http://localhost:5000/api/kajian')
+            .then(res => res.json())
+            .then(data => setUpcomingKajian(Array.isArray(data) ? data.slice(0, 3) : []))
+            .catch(() => setUpcomingKajian([]));
+    }, []);
 
     return (
         <>
@@ -30,14 +58,18 @@ export default function HomePage({ navigate }) {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-md">
                         <h3 className="text-2xl font-bold text-slate-800 mb-4">Jadwal Sholat Hari Ini</h3>
-                        <p className="text-sm text-slate-500 mb-6">Untuk wilayah Bandung dan sekitarnya (Jumat, 26 September 2025)</p>
+                        <p className="text-sm text-slate-500 mb-6">Untuk wilayah Bandung dan sekitarnya{prayerDate ? ` (${prayerDate})` : ''}</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                            {Object.entries(prayerTimes).map(([name, time]) => (
-                                <div key={name} className="bg-slate-50 p-4 rounded-lg">
-                                    <p className="font-semibold text-slate-700">{name}</p>
-                                    <p className="text-2xl font-bold text-emerald-600 tracking-wider">{time}</p>
-                                </div>
-                            ))}
+                            {prayerTimes ? (
+                                Object.entries(prayerTimes).map(([name, time]) => (
+                                    <div key={name} className="bg-slate-50 p-4 rounded-lg">
+                                        <p className="font-semibold text-slate-700">{name}</p>
+                                        <p className="text-2xl font-bold text-emerald-600 tracking-wider">{time}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="col-span-4 text-center text-slate-400">Memuat jadwal sholat...</div>
+                            )}
                         </div>
                     </div>
                     <div className="bg-emerald-600 text-white p-8 rounded-2xl shadow-md flex flex-col justify-center items-center text-center">
@@ -71,7 +103,7 @@ export default function HomePage({ navigate }) {
             <section className="mb-12">
                 <h2 className="text-3xl font-bold mb-6 text-center">Kajian Terdekat</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {upcomingKajian.map(kajian => <KajianCard key={kajian.id} kajian={kajian} navigate={navigate} />)}
+                    {upcomingKajian.map(kajian => <KajianCard key={kajian._id} kajian={kajian} navigate={navigate} />)}
                 </div>
             </section>
 
@@ -95,4 +127,3 @@ export default function HomePage({ navigate }) {
         </>
     );
 }
-

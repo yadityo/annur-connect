@@ -21,7 +21,8 @@ export default function App() {
     const [pageId, setPageId] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [userRegisteredIds, setUserRegisteredIds] = useState([2]);
+    // store registered kajian ids as strings (MongoDB _id) — start empty by default
+    const [userRegisteredIds, setUserRegisteredIds] = useState([]);
 
     // Router effect (uses hash-based routing like original implementation)
     useEffect(() => {
@@ -47,7 +48,8 @@ export default function App() {
                 return;
             }
             setPage(newPage);
-            setPageId(id ? parseInt(id, 10) : null);
+            // keep id as string (do not parseInt) so MongoDB ObjectId values are preserved
+            setPageId(id ? id : null);
             window.scrollTo(0, 0);
         };
 
@@ -82,12 +84,13 @@ export default function App() {
 
     // User Kajian methods
     const registerKajian = (kajianId) => {
-        if (!userRegisteredIds.includes(kajianId)) {
-            setUserRegisteredIds([...userRegisteredIds, kajianId]);
+        const normalized = userRegisteredIds.map(String);
+        if (!normalized.includes(String(kajianId))) {
+            setUserRegisteredIds([...userRegisteredIds, String(kajianId)]);
         }
     };
     const unregisterKajian = (kajianId) => {
-        setUserRegisteredIds(userRegisteredIds.filter(id => id !== kajianId));
+        setUserRegisteredIds(userRegisteredIds.filter(id => String(id) !== String(kajianId)));
     };
 
     // Page Renderer

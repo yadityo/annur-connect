@@ -1,8 +1,17 @@
-import React, { useMemo } from 'react';
-import { ALL_KAJIAN } from '../data';
+import React, { useMemo, useEffect, useState } from 'react';
 
 export default function ProfilPage({ navigate, currentUser, userRegisteredIds, unregisterKajian }) {
-    const userRegisteredKajian = useMemo(() => ALL_KAJIAN.filter(k => userRegisteredIds.includes(k.id)), [userRegisteredIds]);
+    const [kajianList, setKajianList] = useState([]);
+    useEffect(() => {
+        fetch('http://localhost:5000/api/kajian')
+            .then(res => res.json())
+            .then(data => setKajianList(Array.isArray(data) ? data : []))
+            .catch(() => setKajianList([]));
+    }, []);
+
+    // normalize comparison as strings — userRegisteredIds is stored as strings (_id)
+    const registeredSet = useMemo(() => new Set((userRegisteredIds || []).map(String)), [userRegisteredIds]);
+    const userRegisteredKajian = useMemo(() => kajianList.filter(k => registeredSet.has(String(k._id))), [kajianList, registeredSet]);
 
     if (!currentUser || currentUser.role !== 'jamaah') {
         return <p>Halaman tidak dapat diakses.</p>;
@@ -28,12 +37,12 @@ export default function ProfilPage({ navigate, currentUser, userRegisteredIds, u
                                 <p className="text-slate-500 text-center py-8">Anda belum mendaftar kajian apapun.</p>
                             ) : (
                                 userRegisteredKajian.map(kajian => (
-                                    <div key={kajian.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                                    <div key={kajian._id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
                                         <div>
-                                            <a onClick={(e) => { e.preventDefault(); navigate('kajian_detail', kajian.id); }} href="#" className="font-semibold text-slate-800 hover:text-emerald-600">{kajian.judul}</a>
-                                            <p className="text-sm text-slate-500">{kajian.ustadz} - {kajian.tanggal}</p>
+                                            <a onClick={(e) => { e.preventDefault(); navigate('kajian_detail', kajian._id); }} href="#" className="font-semibold text-slate-800 hover:text-emerald-600">{kajian.judul}</a>
+                                            <p className="text-sm text-slate-500">{kajian.ustadz?.nama || kajian.ustadz} - {kajian.tanggal}</p>
                                         </div>
-                                        <button onClick={() => unregisterKajian(kajian.id)} className="text-sm text-red-500 hover:text-red-700 font-medium">Batalkan</button>
+                                        <button onClick={() => unregisterKajian(kajian._id)} className="text-sm text-red-500 hover:text-red-700 font-medium">Batalkan</button>
                                     </div>
                                 ))
                             )}
@@ -44,4 +53,3 @@ export default function ProfilPage({ navigate, currentUser, userRegisteredIds, u
         </>
     );
 }
-
