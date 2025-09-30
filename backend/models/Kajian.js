@@ -6,5 +6,6 @@ const kajianSchema = new mongoose.Schema({
     tanggal: { type: Date, required: true },
     kategori: { type: mongoose.Schema.Types.ObjectId, ref: 'KategoriKajian', required: true },
     deskripsi: { type: String }
+});
 
 module.exports = mongoose.model('Kajian', kajianSchema);
