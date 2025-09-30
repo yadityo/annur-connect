@@ -26,7 +26,7 @@ export default function ProfilPage({ navigate, currentUser, userRegisteredIds, u
                         <img src="https://placehold.co/128x128/E2E8F0/475569?text=U" alt="User Profile" className="w-32 h-32 rounded-full mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-slate-900">{currentUser.name}</h2>
                         <p className="text-slate-500">{currentUser.email}</p>
-                        <button className="mt-4 w-full bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200 transition-colors">Edit Profil</button>
+                        {/*<button className="mt-4 w-full bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200 transition-colors">Edit Profil</button>*/}
                     </div>
                 </div>
                 <div className="lg:col-span-2">
