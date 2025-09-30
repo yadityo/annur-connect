@@ -120,7 +120,7 @@ export default function HomePage({ navigate }) {
                     </div>
                     <div className="font-bold text-slate-400">ATAU</div>
                     <div>
-                        <img src="https://placehold.co/150x150/E2E8F0/475569?text=QRIS" alt="QRIS Code for Donation" className="rounded-lg"/>
+                        <img src="./src/assets/frame.png" alt="QRIS Code for Donation" className="w-32"/>
                     </div>
                 </div>
             </section>
